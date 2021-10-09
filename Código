@@ -1,0 +1,222 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Sep 23 12:32:34 2021
+
+@author: uriel
+"""
+import numpy as np
+def buscamaxfila(arrayy):
+    S=np.zeros(len(arrayy[0]))
+    for i in range(len(arrayy)):
+        fila=abs(arrayy[i])
+        posmax= np.argmax(fila)
+        S[i]=np.array(abs(arrayy[i,posmax]))
+        # print(arrayy)
+    return (S)
+   
+ 
+def pivoteofilas(mat):
+    w=0
+    matcopia=np.copy(mat)
+    
+    
+    for w in range(3):
+        # print (matcopia)
+        cociente=np.zeros(len(matcopia[0]))
+        columna=[]
+        k=buscamaxfila(matcopia)
+        # print(k)
+        columna=abs(matcopia[:,0])
+        
+        for i in range (len(columna)):
+        
+            cociente[i]=columna[i]/k[i]
+        
+        if (0!=np.argmax(cociente)):
+            temporal=np.copy(mat[w,:])
+            # print (temporal)
+            mat[w,:]=mat[np.argmax(cociente),:]
+            mat[np.argmax(cociente),:]=temporal
+            
+            # print(matcopia)
+            matcopia=np.copy(mat)
+            
+            for t in range(w):
+                print (t)
+                matcopia=np.delete(matcopia,t,axis=1)
+                matcopia=np.delete(matcopia,t,axis=0)
+        # print (mat)
+    return(mat)
+
+def buscamaxcol(arrayy):
+    S=np.zeros(len(arrayy[0]))
+    for i in range(len(arrayy[0])):
+        
+        col=np.copy(arrayy[:,i])
+        # posmax= np.argmax(col)
+        S[i]=np.array(abs(arrayy[np.argmax(col),i]))
+    return (S)
+
+
+def pivoteocol(mat):
+    w=0
+    matcopia=np.copy(mat)
+    
+    
+    for w in range(len(mat[0])-1):
+        # print (matcopia)
+        cociente=np.zeros(len(matcopia[0]))
+        fila=[]
+        k=buscamaxcol(matcopia)
+        # print ("\n \nMatriz inicial\n",format(mat))
+        # print("Máximos por fila ite ",format(w))
+        # print(k)
+        
+        fila=abs(matcopia[0,:])
+        # print ("Fila para cociente")
+        # print (fila) 
+        for i in range (len(fila)):
+        
+            cociente[i]=fila[i]/k[i]
+        # print("el cociente es:",format(cociente))
+        # print ("posicion maximo",format(np.argmax(cociente)))
+        if (0!=np.argmax(cociente)):
+            temporal=np.copy(mat[:,w])
+            # print (temporal)
+            mat[:,w]=mat[:,np.argmax(cociente)]
+            # print(mat[:,np.argmax(cociente)])
+            mat[:,np.argmax(cociente)]=temporal
+            
+            # print(matcopia)
+            matcopia=np.copy(mat)
+            
+            for t in range(w):
+                print (t)
+                matcopia=np.delete(matcopia,t,axis=1)
+                matcopia=np.delete(matcopia,t,axis=0)
+        # print (mat)
+    return(mat)
+
+def piv(mat):
+    co=np.copy(mat)
+    co=pivoteocol(co)
+    co=pivoteofilas(co)    
+    return(co)
+
+
+def read_inputs(text_basis):
+    a,b=text_basis.strip().split("=")
+    b=eval(b.strip())
+    # print (a,b)
+    a=a.split()
+    a=[eval(i) for i in a]
+    return a,b
+    
+def obtener_sistema(dir_):
+    A=[]
+    B=[]
+    with open(dir_ , "r") as f:
+        for line in f:
+            if line.strip()!='X' and line.strip() != 'Y':
+                aux_a, aux_b=read_inputs(line)
+                A.append(aux_a)
+                B.append(aux_b)
+            # else:
+        n=len(B)
+        # print (n)
+        for fila in range (n):
+            A[fila].append(B[fila])
+            
+    return A
+    
+def impnp(matriz,archivo):
+    n=len(matriz)
+    # print (matriz[0][n])
+    cont=0
+    for i in matriz:
+        z=96
+        for j in i:
+            if j==matriz[cont][n-1]:
+                z+=1
+                archivo.write("{}{}= ".format(j,chr(z)))
+            elif j==matriz[cont][n]:
+                archivo.write("{} ".format(j))
+            else:
+                # print (j)
+                z+=1
+                archivo.write("({}{})+".format(j,chr(z)))
+        
+        cont+=1
+        
+        archivo.write("\n")
+
+#Se definen los elementos del ejemplo
+# def sol_lista(pol):
+#     A=pol
+#     n=len(A)
+#     # print (n)
+#     C = [fila[n] for fila in pol]
+#     # print (C)
+#     with open("SolucionLista.txt","w") as f:
+#         f.write("Sistema \n ")
+#         impnp(pol,f)
+#         for fi_la in A:
+#             del fi_la[n]
+#         # print (A)
+#     #Usando notación de listas (útil para casos generales)
+#         x = [0.0 for i in range(n)]
+#         # print (x)
+#         aux = [1.0 for i in range(n)]
+#         # print (aux)
+#         umbral = 1/100000000000000000000000000000000
+#         for ite in range(100000):
+#             var=97
+#             f.write("-------------------\nIteranción {}:\n".format(ite+1))
+#             for h in range(n):
+#                 # print (h)x|x|x|x|
+#                 aux[h] = 0.0  
+#                 x[h] = (C[h]-sum([i*j*k for i,j,k in zip(aux,x,A[h])]))/A[h][h]
+#                 # print (x)
+#                 f.write("{}={} \n".format(chr(var),x[h]))
+#                 var+=1
+#                 aux[h] = 1.0
+#             current_differences = [C[h] - sum([i*j for i,j in zip(x,A[h])]) for h in range(3)]
+#             error = sum([abs(i) for i in current_differences])
+        
+#             if error < umbral:
+#                 break
+#     return x
+
+def sol_np (pol):
+    n=len(pol)
+    # var=97
+    A=np.delete(pol,n,axis=1)
+    C=pol[:,(n)]
+    umbral=.000000000000001
+    x=np.zeros(n)
+    # impnp(A)
+    aux=np.ones(n)
+    with open("SolNumberPy.txt","w") as f:
+        f.write("Sistema a sollucionar: \n")
+        impnp(pol, f)    
+        for ite in range(100000):
+            var=97
+            f.write("-------------------\nIteranción {}:\n".format(ite+1))
+            for z in range (n):
+                aux[z]=0
+                x[z]=(C[z]-np.sum(x*aux*A[z,:]))/(A[z][z])
+                f.write("{}={} \n".format(chr(var),x[z]))
+                var+=1
+                aux[z]=1
+                
+                
+            x_r=np.dot(A,x)
+            error=np.sum(np.abs(x_r-C))
+            if error < umbral:
+                break
+    return x
+
+ruta="C:/Users/uriel/OneDrive/Documentos/Universidad/3er Semestre/Programación phyton/Gauss Seide/Matriz.txt"
+# con_listas=sol_lista(obtener_sistema(ruta))
+con_numpy=sol_np(piv(np.array(obtener_sistema(ruta))))
+
